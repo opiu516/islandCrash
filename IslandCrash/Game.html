@@ -1,0 +1,193 @@
+<canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<script src = " JS/Map.js"> </script>
+<script src = " JS/Player.js"> </script>
+<script src = " JS/Objects.js"> </script>
+<script src = " JS/Inventory_Items.js"> </script>
+<script>
+	var ctx = document.getElementById("ctx").getContext("2d"); 
+	ctx.font = '30px Arial';
+	var Clenght = 500,Cheight = 500;
+	var mapLenght = 50,mapHeight = 50;
+	var tileLenght = 30,tileHeight = 30;
+	
+	var skins ={};
+	skins.tree = new Image();
+	skins.tree.src = "Img/Tree.png";
+	skins.rock = new Image();
+	skins.rock.src = "Img/Rock.png";
+	skins.wood = new Image();
+	skins.wood.src = "Img/Wood.png";
+	skins.player = new Image();
+	skins.player.src = "Img/Player.png";
+	skins.rocki = new Image();
+	skins.rocki.src = "Img/Rock.png";
+	
+	mrfs = function ( size ){
+	var block = {
+	lenght : 0,
+	height : 0
+	}
+	 for(var i = 1;i < size - 1;i++)
+		for(var z = i;z <= size; z++)
+			if(i*z == size){
+			block.lenght = i;
+			block.height = z;
+			}
+	return block;
+	}
+	IPVM = function(rect){
+		var X = rect.x - rect.lenght/2;
+		var Y = rect.y - rect.height/2;
+		if( X > mapLenght - rect.lenght/2 - 4 || X < rect.lenght/2 + 2){
+		return false;
+		//console.log( " X failed!");
+		}
+		if( Y > mapHeight - rect.height/2 - 4 || Y < rect.height/2 + 2){
+		return false;
+		//console.log( " Y failed!");
+		}
+		X = Math.floor(X);
+		Y = Math.floor(Y);
+		//console.log("  IPV  -   X  - "  + X + "   Y  - "  + Y + rect);
+		for(var i = 0;i < rect.height;i++)
+			for(var z = 0;z < rect.lenght;z++)
+				if(map.arr[Y + i][X + z] != 1) 
+				return false;
+		return true;
+	}
+	IPVO = function(x,y,lenght,height){
+		var X = x;
+		var Y = y;
+		if( X > mapLenght - lenght/2 - 3 || X < 0 + lenght/2 + 3){
+		return false;
+		//console.log( " X failed!");
+		}
+		if( Y > mapHeight - height/2 - 3 || Y < 0 + height/2 + 3){
+		return false;
+		//console.log( " Y failed!");
+		}
+		//console.log("  IPV  -   X  - "  + X + "   Y  - "  + Y + rect);
+		for(var i = 0;i < height;i++)
+			for(var z = 0;z < lenght;z++)
+				if(map.arr[Y + i][X + z] != 0)return false;
+		return true;
+	}
+	IPPV = function(pt){
+	var Xcord = Math.floor(pt.x/tileLenght);
+	var Ycord = Math.floor(pt.y/tileHeight);
+	//console.log(" X -  " + Xcord + "    Y  -  " + Ycord);
+	if(Xcord < mapLenght && Ycord < mapHeight && Xcord >= 0 && Ycord >= 0){
+	if( map.arr[Ycord][Xcord] == 0) return true;
+	else return false;
+	}
+	else return false;
+	}
+	POM = function(rect,q){
+		var X = rect.x - rect.lenght/2;
+		var Y = rect.y - rect.height/2;
+		X = Math.floor(X);
+		Y = Math.floor(Y);
+		//console.log(" POM   -  X  - "  + X + "   Y  - "  + Y + "    ID    - " + q);
+		for(var i = 0;i < rect.height;i++)
+			for(var z = 0;z < rect.lenght;z++)
+			map.arr[Y + i][X + z] = q;
+	}
+	POMO = function(rect,q){
+		var x = rect.x / tileLenght;
+		var y = rect.y / tileHeight;
+		var height = rect.height / tileHeight;
+		var lenght = rect.lenght / tileLenght;
+		var X = x - lenght/2;
+		var Y = y - height/2;
+		X = Math.floor(X);
+		Y = Math.floor(Y);
+		//console.log(" POM   -  X  - "  + X + "   Y  - "  + Y + "    ID    - " + q);
+		for(var i = 0;i < height;i++)
+			for(var z = 0;z < lenght;z++)
+			map.arr[Y + i][X + z] = q;
+	}
+	COMO = function(rect){
+		var x = rect.x / tileLenght;
+		var y = rect.y / tileHeight;
+		var height = rect.height / tileHeight;
+		var lenght = rect.lenght / tileLenght;
+		var X = x - lenght/2;
+		var Y = y - height/2;
+		X = Math.floor(X);
+		Y = Math.floor(Y);
+		//console.log(" POM   -  X  - "  + X + "   Y  - "  + Y + "    ID    - " + q);
+		for(var i = 0;i < height;i++)
+			for(var z = 0;z < lenght;z++)
+			map.arr[Y + i][X + z] = 0;
+	}
+	
+	
+	//movement
+	document.onkeydown = function(event){
+	if(event.keyCode == 37 ){
+		player.Left = true;
+		player.drillDirection = "Left";
+		player.direction = 3;
+		}
+	if(event.keyCode == 39 ){
+		player.Right = true;
+		player.drillDirection = "Right";
+		player.direction = 1;
+		}
+	if(event.keyCode == 38 ){
+		player.Up = true;
+		player.drillDirection = "Up";
+		player.direction = 0;
+		}
+	if(event.keyCode == 40 ){
+		player.Down = true;
+		player.drillDirection = "Down";
+		player.direction = 2;
+		}
+	if(event.keyCode == 90) player.inventory.cSlot --;
+	if(event.keyCode == 88) player.using = true;
+	if(event.keyCode == 67) player.inventory.cSlot ++;
+	if(event.keyCode == 65) player.inventory.drop();
+	}
+	document.onkeyup = function(event){
+	if(event.keyCode == 37 )
+		player.Left = false;
+	if(event.keyCode == 39 )
+		player.Right = false;
+	if(event.keyCode == 38 )
+		player.Up = false;
+	if(event.keyCode == 40 )
+		player.Down = false;
+		if(event.keyCode == 88) player.using = false;
+		}
+	
+	var player = makeplayer(25*tileLenght,25*tileHeight,20,20,3,3,skins.player);
+	var map = makemap();
+	var objList = {};
+	var itemList = {};
+	getmap = function(){
+	map.create();
+	var rockNum = Math.floor(Math.random()*4);
+	var treeNum = Math.floor(Math.random()*25 + 5);
+	for(var q = 0; q < rockNum;q++){
+	makerock();
+	//console.log(" rock ");
+	}
+	for(var q = 0; q < treeNum;q++){
+	maketree();
+	//console.log(" tree ");
+	}
+	player.release();
+	}
+	getmap();
+	update = function(){
+	ctx.clearRect(0,0,Clenght,Cheight);
+	map.print();
+	for(var i in objList)
+		objList[i].update();
+	for(var i in itemList)
+		itemList[i].update();
+	player.update();
+	};
+	setInterval(update,40);
+</script>
